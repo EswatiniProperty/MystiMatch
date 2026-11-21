@@ -1,541 +1,218 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MystiMatch 💗</title>
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  font-family: Arial, sans-serif;
-}
-
-body {
-  background: linear-gradient(135deg, #fff0f5, #f4e9ff);
-  color: #40283d;
-  min-height: 100vh;
-}
-
-header {
-  background: linear-gradient(120deg, #e85d91, #a77be8);
-  color: white;
-  padding: 22px 15px;
-  text-align: center;
-}
-
-header h1 {
-  font-size: 30px;
-  letter-spacing: 1px;
-}
-
-header p {
-  margin-top: 6px;
-  font-size: 13px;
-}
-
-nav {
-  display: flex;
-  justify-content: space-around;
-  background: white;
-  padding: 13px 4px;
-  box-shadow: 0 3px 12px #00000010;
-  position: sticky;
-  top: 0;
-  z-index: 5;
-}
-
-nav button {
-  border: none;
-  background: none;
-  color: #9c5483;
-  font-weight: bold;
-  cursor: pointer;
-  font-size: 12px;
-}
-
-nav button.active {
-  color: #e34f8c;
-}
-
-.container {
-  max-width: 650px;
-  margin: auto;
-  padding: 20px 15px;
-}
-
-.page {
-  display: none;
-}
-
-.page.active {
-  display: block;
-}
-
-h2 {
-  margin-bottom: 15px;
-  color: #a64d83;
-}
-
-.profile-card {
-  border-radius: 20px;
-  padding: 20px;
-  margin-bottom: 18px;
-  box-shadow: 0 7px 20px #00000012;
-  color: white;
-}
-
-.profile-card.male {
-  background: linear-gradient(135deg, #3988e8, #6db8f5);
-}
-
-.profile-card.female {
-  background: linear-gradient(135deg, #ed78aa, #f6a9ca);
-}
-
-.avatar {
-  width: 85px;
-  height: 85px;
-  border-radius: 50%;
-  background: #ffffff55;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 42px;
-  margin-bottom: 12px;
-}
-
-.profile-card h3 {
-  font-size: 23px;
-  margin-bottom: 6px;
-}
-
-.profile-card p {
-  margin: 8px 0;
-  line-height: 1.5;
-}
-
-.tag {
-  display: inline-block;
-  background: #ffffff35;
-  padding: 6px 10px;
-  border-radius: 20px;
-  margin: 4px 3px 4px 0;
-  font-size: 12px;
-}
-
-.match-btn, .action-btn {
-  background: white;
-  color: #d94e8b;
-  border: none;
-  border-radius: 25px;
-  padding: 11px 22px;
-  font-weight: bold;
-  margin-top: 12px;
-  cursor: pointer;
-}
-
-.action-btn {
-  background: #e85d91;
-  color: white;
-  margin-right: 7px;
-}
-
-.decline-btn {
-  background: #888;
-}
-
-input, textarea, select {
-  width: 100%;
-  padding: 13px;
-  margin: 8px 0 15px;
-  border: 1px solid #edc8dc;
-  border-radius: 12px;
-  background: white;
-  font-size: 15px;
-}
-
-textarea {
-  min-height: 100px;
-  resize: vertical;
-}
-
-label {
-  font-weight: bold;
-  color: #92517d;
-}
-
-.panel {
-  background: white;
-  border-radius: 18px;
-  padding: 18px;
-  margin-bottom: 15px;
-  box-shadow: 0 5px 15px #0000000d;
-}
-
-.message {
-  background: #fce6f0;
-  padding: 12px;
-  border-radius: 15px;
-  margin: 8px 0;
-  max-width: 85%;
-}
-
-.message.mine {
-  background: #eadfff;
-  margin-left: auto;
-}
-
-footer {
-  text-align: center;
-  padding: 25px;
-  color: #a66d91;
-  font-size: 12px;
-}
-
-.notice {
-  font-size: 13px;
-  color: #81516f;
-  line-height: 1.5;
-  margin-bottom: 15px;
-}
-
-.empty {
-  text-align: center;
-  color: #9b7190;
-  padding: 25px;
-}
-
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
+body { background: linear-gradient(135deg, #fff0f5, #f4e9ff); color: #40283d; min-height: 100vh; }
+header { background: linear-gradient(120deg, #e85d91, #a77be8); color: white; padding: 22px 15px; text-align: center; }
+header h1 { font-size: 30px; }
+header p { margin-top: 6px; font-size: 13px; }
+nav { display: flex; justify-content: space-around; background: white; padding: 13px 4px; box-shadow: 0 3px 12px #00000010; position: sticky; top: 0; z-index: 5; }
+nav button { border: none; background: none; color: #9c5483; font-weight: bold; cursor: pointer; font-size: 12px; }
+nav button.active { color: #e34f8c; }
+.container { max-width: 650px; margin: auto; padding: 20px 15px; }
+.page { display: none; } .page.active { display: block; }
+h2 { margin-bottom: 15px; color: #a64d83; }
+.profile-card { border-radius: 20px; padding: 20px; margin-bottom: 18px; box-shadow: 0 7px 20px #00000012; color: white; }
+.profile-card.male { background: linear-gradient(135deg, #3988e8, #6db8f5); }
+.profile-card.female { background: linear-gradient(135deg, #ed78aa, #f6a9ca); }
+.avatar { width: 85px; height: 85px; border-radius: 50%; background: #ffffff55; display: flex; justify-content: center; align-items: center; font-size: 42px; margin-bottom: 12px; }
+.profile-card h3 { font-size: 23px; margin-bottom: 6px; }
+.profile-card p { margin: 8px 0; line-height: 1.5; }
+.tag { display: inline-block; background: #ffffff35; padding: 6px 10px; border-radius: 20px; margin: 4px 3px 4px 0; font-size: 12px; }
+.match-btn, .action-btn { background: white; color: #d94e8b; border: none; border-radius: 25px; padding: 11px 22px; font-weight: bold; margin-top: 12px; cursor: pointer; }
+.action-btn { background: #e85d91; color: white; margin-right: 7px; }
+.decline-btn { background: #888; }
+input, textarea, select { width: 100%; padding: 13px; margin: 8px 0 15px; border: 1px solid #edc8dc; border-radius: 12px; background: white; font-size: 15px; }
+textarea { min-height: 100px; resize: vertical; }
+label { font-weight: bold; color: #92517d; }
+.panel { background: white; border-radius: 18px; padding: 18px; margin-bottom: 15px; box-shadow: 0 5px 15px #0000000d; }
+.message { background: #fce6f0; padding: 12px; border-radius: 15px; margin: 8px 0; max-width: 85%; }
+.message.mine { background: #eadfff; margin-left: auto; }
+footer { text-align: center; padding: 25px; color: #a66d91; font-size: 12px; }
+.notice { font-size: 13px; color: #81516f; line-height: 1.5; margin-bottom: 15px; }
+.empty { text-align: center; color: #9b7190; padding: 25px; }
 </style>
 </head>
-
 <body>
-
-<header>
-  <h1>💗 MystiMatch</h1>
-  <p>Mystery first. Connection forever.</p>
-</header>
-
+<header><h1>💗 MystiMatch</h1><p>Mystery first. Connection forever.</p></header>
 <nav>
   <button class="active" onclick="showPage('discover', this)">Discover</button>
   <button onclick="showPage('requests', this)">Requests</button>
   <button onclick="showPage('inbox', this)">Inbox</button>
   <button onclick="showPage('profile', this)">Profile</button>
 </nav>
-
 <div class="container">
-
-<section id="discover" class="page active">
-  <h2>Discover people ✨</h2>
-  <p class="notice">Explore fictional demo profiles and send a sample connection request.</p>
-  <div id="profiles"></div>
-</section>
-
-<section id="requests" class="page">
-  <h2>Match requests 💌</h2>
-  <div id="requestsList"></div>
-</section>
-
-<section id="inbox" class="page">
-  <h2>Your inbox 💬</h2>
-  <div id="inboxList"></div>
-  <div id="chatArea"></div>
-</section>
-
-<section id="profile" class="page">
-  <h2>Your profile 🌷</h2>
-
+<section id="discover" class="page active"><h2>Discover people ✨</h2><p class="notice">Real profiles from Supabase. Save your profile first, then you will appear here for others.</p><div id="profiles"></div></section>
+<section id="requests" class="page"><h2>Match requests 💌</h2><div id="requestsList"></div></section>
+<section id="inbox" class="page"><h2>Your inbox 💬</h2><div id="inboxList"></div><div id="chatArea"></div></section>
+<section id="profile" class="page"><h2>Your profile 🌷</h2>
   <div class="panel">
-    <label>Display name</label>
-    <input id="name" placeholder="Your display name">
-
-    <label>Age (18+ only)</label>
-    <input id="age" type="number" min="18" placeholder="Your age">
-
-    <label>Gender</label>
-    <select id="gender">
-      <option value="">Choose gender</option>
-      <option value="male">Male</option>
-      <option value="female">Female</option>
-    </select>
-
-    <label>Bio</label>
-    <textarea id="bio" placeholder="Tell people a little about yourself..."></textarea>
-
+    <label>Display name</label><input id="name" placeholder="Your display name">
+    <label>Age (18+ only)</label><input id="age" type="number" min="18" placeholder="Your age">
+    <label>Gender</label><select id="gender"><option value="">Choose gender</option><option value="male">Male</option><option value="female">Female</option></select>
+    <label>Bio</label><textarea id="bio" placeholder="Tell people a little about yourself..."></textarea>
     <button class="action-btn" onclick="saveProfile()">Save profile</button>
-    <p class="notice">Use truthful information when creating a real account. This demo does not verify age or identity.</p>
+    <p class="notice">Use truthful information. 18+ only. Your profile is now saved to Supabase.</p>
   </div>
 </section>
-
 </div>
-
-<footer>
-  © 2026 MystiMatch · Mystery first, connection forever 💗
-</footer>
-
+<footer>©️ 2026 MystiMatch · Mystery first, connection forever 💗</footer>
 <script>
+const SUPABASE_URL = "https://wpdbgnimqpcrvjlhw.supabase.co";
+const SUPABASE_KEY = "sb_publishable_x--ILBSo9LETqorXH0bTJA_81LUdZUo";
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const demoProfiles = [
-  {
-    id: 1,
-    name: "Alex",
-    age: 20,
-    gender: "male",
-    emoji: "😎",
-    bio: "I love music, adventures and meeting new people.",
-    tags: ["Music", "Adventure", "Movies"]
-  },
-  {
-    id: 2,
-    name: "Sophia",
-    age: 21,
-    gender: "female",
-    emoji: "🌸",
-    bio: "A creative soul who loves travelling and good conversations.",
-    tags: ["Art", "Travel", "Reading"]
-  },
-  {
-    id: 3,
-    name: "Jordan",
-    age: 19,
-    gender: "male",
-    emoji: "🎧",
-    bio: "Music lover, gamer and always looking for new experiences.",
-    tags: ["Gaming", "Music", "Sports"]
-  },
-  {
-    id: 4,
-    name: "Lily",
-    age: 20,
-    gender: "female",
-    emoji: "🦋",
-    bio: "I enjoy photography, nature and discovering new things.",
-    tags: ["Nature", "Photography", "Fashion"]
-  }
-];
+let myId = localStorage.getItem("mystimatch_id");
+if(!myId){ myId = "user_" + Math.random().toString(36).slice(2,10); localStorage.setItem("mystimatch_id", myId); }
 
+let allProfiles = [];
 let requests = [];
 let matches = [];
-let messages = {};
-
-let myProfile = {
-  name: "",
-  age: "",
-  gender: "",
-  bio: ""
-};
-
 let currentChat = null;
 
-function showPage(page, button) {
-  document.querySelectorAll(".page").forEach(p => {
-    p.classList.remove("active");
-  });
-
+function showPage(page, button){
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
   document.getElementById(page).classList.add("active");
-
-  document.querySelectorAll("nav button").forEach(b => {
-    b.classList.remove("active");
-  });
-
+  document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
   button.classList.add("active");
-
-  if (page === "requests") renderRequests();
-  if (page === "inbox") renderInbox();
+  if(page==="requests") renderRequests();
+  if(page==="inbox") renderInbox();
 }
 
-function renderProfiles() {
+async function loadProfiles(){
+  const { data, error } = await supabaseClient.from("profiles").select("*").order("created_at", {ascending:false});
+  if(error){ document.getElementById("profiles").innerHTML = `<div class="empty">Could not load profiles. Check Supabase tables.<br>${error.message}</div>`; return; }
+  allProfiles = (data||[]).filter(p=>p.id !== myId);
+  renderProfiles();
+}
+
+function renderProfiles(){
   const container = document.getElementById("profiles");
   container.innerHTML = "";
-
-  demoProfiles.forEach(person => {
-    const alreadySent = requests.some(r => r.id === person.id);
-    const alreadyMatched = matches.some(m => m.id === person.id);
-
+  if(allProfiles.length===0){ container.innerHTML = `<div class="empty">No real profiles yet. Be the first! Go to Profile and save yours 💗</div>`; return; }
+  allProfiles.forEach(person=>{
     const card = document.createElement("div");
-    card.className = "profile-card " + person.gender;
-
+    card.className = "profile-card " + (person.gender||"female");
     card.innerHTML = `
-      <div class="avatar">${person.emoji}</div>
+      <div class="avatar">${person.emoji||"💗"}</div>
       <h3>${person.name}, ${person.age}</h3>
-      <p>${person.bio}</p>
-      <div>
-        ${person.tags.map(tag => `<span class="tag">${tag}</span>`).join("")}
-      </div>
-      <button class="match-btn"
-        ${alreadySent || alreadyMatched ? "disabled" : ""}
-        onclick="sendRequest(${person.id})">
-        ${alreadyMatched ? "Matched ✓" : alreadySent ? "Request sent ✓" : "💗 Match"}
-      </button>
+      <p>${person.bio||""}</p>
+      <button class="match-btn" onclick="sendRequest('${person.id}','${person.name}')">💗 Match</button>
     `;
-
     container.appendChild(card);
   });
 }
 
-function sendRequest(id) {
-  const person = demoProfiles.find(p => p.id === id);
-
-  if (!person) return;
-
-  if (requests.some(r => r.id === id) ||
-      matches.some(m => m.id === id)) {
-    return;
-  }
-
-  requests.push({
-    id: person.id,
-    name: person.name,
-    age: person.age,
-    gender: person.gender,
-    emoji: person.emoji
-  });
-
-  alert("Your demo match request was sent!");
-  renderProfiles();
+async function sendRequest(toId, toName){
+  const myName = document.getElementById("name").value || localStorage.getItem("mystimatch_name") || "Someone";
+  const { error } = await supabaseClient.from("match_requests").insert({ from_id: myId, to_id: toId, from_name: myName, to_name: toName, status: "pending" });
+  if(error){ alert("Error: "+error.message); return; }
+  alert("Match request sent to "+toName+"! 💗");
 }
 
-function renderRequests() {
+async function loadRequests(){
+  const { data } = await supabaseClient.from("match_requests").select("*").eq("to_id", myId).eq("status","pending").order("created_at",{ascending:false});
+  requests = data||[];
+  const { data: mine } = await supabaseClient.from("match_requests").select("*").eq("from_id", myId).eq("status","accepted");
+  matches = mine||[];
+}
+
+function renderRequests(){
   const container = document.getElementById("requestsList");
   container.innerHTML = "";
-
-  if (requests.length === 0) {
-    container.innerHTML = `<div class="empty">No requests yet 💌</div>`;
-    return;
-  }
-
-  requests.forEach(person => {
+  if(requests.length===0){ container.innerHTML = `<div class="empty">No requests yet 💌</div>`; return; }
+  requests.forEach(r=>{
     const card = document.createElement("div");
     card.className = "panel";
-
-    card.innerHTML = `
-      <h3>${person.emoji} ${person.name}, ${person.age}</h3>
-      <p>Demo match request</p>
-      <button class="action-btn" onclick="acceptRequest(${person.id})">Accept</button>
-      <button class="action-btn decline-btn" onclick="declineRequest(${person.id})">Decline</button>
-    `;
-
+    card.innerHTML = `<h3>💗 ${r.from_name}</h3><p>Wants to match with you</p><button class="action-btn" onclick="acceptRequest('${r.id}')">Accept</button><button class="action-btn decline-btn" onclick="declineRequest('${r.id}')">Decline</button>`;
     container.appendChild(card);
   });
 }
 
-function acceptRequest(id) {
-  const person = requests.find(r => r.id === id);
-  if (!person) return;
-
-  matches.push(person);
-  requests = requests.filter(r => r.id !== id);
-
-  messages[id] = [
-    { text: "You matched! Say hello 👋", mine: false }
-  ];
-
+async function acceptRequest(id){
+  await supabaseClient.from("match_requests").update({status:"accepted"}).eq("id", id);
   alert("It's a match! 💗");
-  renderRequests();
-  renderInbox();
-  renderProfiles();
+  await loadRequests(); renderRequests(); renderInbox();
+}
+async function declineRequest(id){
+  await supabaseClient.from("match_requests").update({status:"declined"}).eq("id", id);
+  await loadRequests(); renderRequests();
 }
 
-function declineRequest(id) {
-  requests = requests.filter(r => r.id !== id);
-  renderRequests();
-}
-
-function renderInbox() {
+async function renderInbox(){
+  await loadRequests();
   const container = document.getElementById("inboxList");
   container.innerHTML = "";
-
   document.getElementById("chatArea").innerHTML = "";
-
-  if (matches.length === 0) {
-    container.innerHTML = `<div class="empty">Your inbox is waiting for a match 💗</div>`;
-    return;
-  }
-
-  matches.forEach(person => {
-    const button = document.createElement("button");
-    button.className = "action-btn";
-    button.textContent = person.emoji + " " + person.name;
-    button.onclick = () => openChat(person.id);
-    container.appendChild(button);
+  if(matches.length===0){ container.innerHTML = `<div class="empty">Your inbox is waiting for a match 💗</div>`; return; }
+  matches.forEach(m=>{
+    const btn = document.createElement("button");
+    btn.className = "action-btn";
+    btn.textContent = "💗 " + m.to_name;
+    btn.onclick = ()=> openChat(m.id);
+    container.appendChild(btn);
+  });
+  // also show matches where I was accepted
+  const { data: acceptedToMe } = await supabaseClient.from("match_requests").select("*").eq("to_id", myId).eq("status","accepted");
+  (acceptedToMe||[]).forEach(m=>{
+    const btn = document.createElement("button");
+    btn.className = "action-btn";
+    btn.textContent = "💗 " + m.from_name;
+    btn.onclick = ()=> openChat(m.id);
+    container.appendChild(btn);
   });
 }
 
-function openChat(id) {
-  currentChat = id;
-
-  const person = matches.find(m => m.id === id);
-  if (!person) return;
-
+function openChat(matchId){
+  currentChat = matchId;
   const area = document.getElementById("chatArea");
-
-  area.innerHTML = `
-    <div class="panel" style="margin-top:20px">
-      <h3>Chat with ${person.name} 💬</h3>
-      <div id="chatMessages"></div>
-      <input id="messageInput" placeholder="Write a message...">
-      <button class="action-btn" onclick="sendMessage()">Send</button>
-    </div>
-  `;
-
+  area.innerHTML = `<div class="panel" style="margin-top:20px"><h3>Chat 💬</h3><div id="chatMessages"></div><input id="messageInput" placeholder="Write a message..."><button class="action-btn" onclick="sendMessage()">Send</button></div>`;
   renderMessages();
 }
 
-function renderMessages() {
+async function renderMessages(){
   const area = document.getElementById("chatMessages");
-  if (!area) return;
-
+  if(!area) return;
+  const { data } = await supabaseClient.from("messages").select("*").eq("match_id", currentChat).order("created_at",{ascending:true});
   area.innerHTML = "";
-
-  (messages[currentChat] || []).forEach(msg => {
-    const bubble = document.createElement("div");
-    bubble.className = "message" + (msg.mine ? " mine" : "");
-    bubble.textContent = msg.text;
-    area.appendChild(bubble);
+  (data||[]).forEach(msg=>{
+    const b = document.createElement("div");
+    b.className = "message" + (msg.sender_id===myId ? " mine" : "");
+    b.textContent = msg.text;
+    area.appendChild(b);
   });
 }
 
-function sendMessage() {
+async function sendMessage(){
   const input = document.getElementById("messageInput");
   const text = input.value.trim();
-
-  if (!text || currentChat === null) return;
-
-  messages[currentChat].push({
-    text: text,
-    mine: true
-  });
-
-  input.value = "";
-  renderMessages();
+  if(!text || !currentChat) return;
+  await supabaseClient.from("messages").insert({ match_id: currentChat, sender_id: myId, text: text });
+  input.value = ""; renderMessages();
 }
 
-function saveProfile() {
+async function saveProfile(){
   const name = document.getElementById("name").value.trim();
   const age = Number(document.getElementById("age").value);
   const gender = document.getElementById("gender").value;
   const bio = document.getElementById("bio").value.trim();
-
-  if (!name || !age || !gender) {
-    alert("Please enter your name, age and gender.");
-    return;
-  }
-
-  if (age < 18) {
-    alert("This dating demo is for adults aged 18 and over.");
-    return;
-  }
-
-  myProfile = { name, age, gender, bio };
-
-  alert("Your demo profile has been saved!");
+  if(!name || !age || !gender){ alert("Please enter your name, age and gender."); return; }
+  if(age < 18){ alert("18+ only."); return; }
+  const emoji = gender==="male" ? "😎" : "🌸";
+  localStorage.setItem("mystimatch_name", name);
+  const { error } = await supabaseClient.from("profiles").upsert({ id: myId, name, age, gender, bio, emoji });
+  if(error){ alert("Error saving: "+error.message); return; }
+  alert("Profile saved to Supabase! 💗 Now go to Discover.");
+  loadProfiles();
 }
 
-renderProfiles();
-
+loadProfiles();
+loadRequests();
 </script>
 </body>
 </html>
