@@ -87,19 +87,27 @@ async function likeProfile(id){
 }
 async function loadMatches(){
   const list=document.getElementById("matchesList");
-  if(!myId){list.innerHTML="<div class='card'>Create your profile first to see matches.</div>";return}
+  if(!myId){list.innerHTML="<div class='card'>Create your profile first</div>";return}
   try{
-    const reqs=await api("match_requests?select=*&order=created_at.desc");
-    const mine=reqs.filter(r=>r.requester_id===myId||r.receiver_id===myId);
-    if(!mine.length){list.innerHTML="<div class='card'>No likes yet. Go to Discover and like someone!</div>";return}
+    const reqs=await api("match_requests?select=*&or=(requester_id.eq."+myId+",receiver_id.eq."+myId+")");
+    if(!reqs.length){list.innerHTML="<div class='card'>No matches yet</div>";return}
     const profs={};allProfiles.forEach(p=>profs[p.id]=p);
     if(!allProfiles.length){const ps=await api("profiles?select=*");ps.forEach(p=>profs[p.id]=p)}
-    list.innerHTML=mine.map(r=>{
+    list.innerHTML=reqs.map(r=>{
       const otherId=r.requester_id===myId?r.receiver_id:r.requester_id;
-      const p=profs[otherId]||{name:"Someone",age:"",location:"",whatsapp:""};
-      return `<div class="card"><h3>${esc(p.name)} ${p.age?","+p.age:""}</h3><p class="muted">${esc(p.location||"")} • ${r.status}</p><button class="btn small" onclick="openChat('${otherId}','${esc(p.name||'')}')">💬 Chat Here</button></div>`;
+      const p=profs[otherId]||{name:"Someone"};
+      const isIncoming=r.receiver_id===myId && r.status==='pending';
+      return `<div class="card"><h3>${esc(p.name)}</h3><p>Status: ${r.status}</p>
+      ${isIncoming?`<button onclick="respondMatch('${r.id}','accepted')">✅ Accept</button> <button onclick="respondMatch('${r.id}','declined')">❌ Decline</button>`:''}
+      ${r.status==='accepted'?`<button onclick="openChat('${otherId}')">💬 Chat Here</button>`:''}
+      </div>`;
     }).join("");
-  }catch(e){list.innerHTML="<div class='card'>Could not load matches: "+esc(e.message)+"</div>"}
+  }catch(e){list.innerHTML="<div class='card'>Could not load matches</div>"}
+}
+async function respondMatch(id,status){
+  await api("match_requests?id=eq."+id,"PATCH",{status:status});
+  alert(status==='accepted'?'Matched! 💜':'Declined');
+  loadMatches();
 }
 async function renderChat(){
   const box=document.getElementById("chatBox");
