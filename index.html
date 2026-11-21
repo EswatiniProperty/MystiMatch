@@ -76,33 +76,54 @@ async function loadProfiles(){
     allProfiles=await api("profiles?select=*&order=created_at.desc");
     if(!allProfiles.length){el.textContent="No real profiles yet. Be the first — go to Profile tab and create yours!";list.innerHTML="";return}
     el.textContent=allProfiles.length+" real profile(s) found";
-    list.innerHTML=allProfiles.map(p=>`<div class="card">${p.photo_url?`<img class="p" src="${esc(p.photo_url)}">`:""}<h3>${esc(p.name)}, ${p.age||""}</h3><div class="muted">${esc(p.location||"")} • ${esc(p.gender||"")} looking for ${esc(p.looking_for||"")}</div><p class="muted">${esc(p.bio||"")}</p><div><span class="pill">${esc(p.gender||"")}</span><span class="pill">${esc(p.location||"")}</span></div><div class="row"><button class="btn small" onclick="likeProfile('${p.id}')">💜 Like</button><button class="btn small btn2" onclick="whatsapp('${esc(p.whatsapp||"")}','${esc(p.name||"")}')">💬 WhatsApp</button></div></div>`).join("");
+    list.innerHTML=allProfiles.map(p=>`<div class="card">${p.photo_url?`<img class="p" src="${esc(p.photo_url)}">`:""}<h3>${esc(p.name)}, ${p.age||""}</h3><div class="muted">${esc(p.location||"")} • ${esc(p.gender||"")} looking for ${esc(p.looking_for||"")}</div><p class="muted">${esc(p.bio||"")}</p><div><span class="pill">${esc(p.gender||"")}</span><span class="pill">${esc(p.location||"")}</span></div><div class="row"><button class="btn small" onclick="likeProfile('${p.id}','like')">❤️ Like</button><button class="btn small" onclick="likeProfile('${p.id}','super')">🔥 Super Like</button><button class="btn small btn2" onclick="whatsapp('${esc(p.whatsapp||"")}','${esc(p.name||"")}')">💬 WhatsApp</button></div></div>`).join("");
   }catch(e){el.textContent="Could not load profiles: "+e.message;console.log(e)}
 }
 function whatsapp(num,name){if(!num){alert("No WhatsApp number for this person yet.");return}let n=String(num).replace(/[^0-9]/g,"");if(n.startsWith("0"))n="268"+n.slice(1);if(!n.startsWith("268"))n="268"+n;window.open("https://wa.me/"+n+"?text="+encodeURIComponent("Hi "+name+"! I found you on MystiMatch 🔮"),"_blank")}
-async function likeProfile(id){
+async function likeProfile(id, type){
   if(!myId){alert("Create your profile first in Profile tab.");show("profile");return}
   if(id===myId){alert("That's you!");return}
-  try{await api("match_requests", "POST", {requester_id:myId, receiver_id:id, status:"pending"});alert("💜 Like sent!");loadMatches();}catch(e){alert("Like failed: "+e.message)}
+  try{
+    await api("likes", "POST", {liker_id:myId, liked_id:id, type:type||'like'});
+    const back = await api("likes?select=*&liker_id=eq."+id+"&liked_id=eq."+myId);
+    if(back.length > 0){
+      alert("💘 IT'S A MATCH! You both liked each other! Go to Matches to Chat!");
+    } else {
+      alert(type==='super' ? "🔥 Super Like sent!" : "❤️ Like sent!");
+    }
+    loadMatches();
+  }catch(e){
+    if(e.message.includes("duplicate") || e.message.includes("already exists")) alert("You already liked this person!");
+    else alert("Like failed: "+e.message);
+  }
 }
 async function loadMatches(){
   const list=document.getElementById("matchesList");
   if(!myId){list.innerHTML="<div class='card'>Create your profile first</div>";return}
   try{
-    const reqs=await api("match_requests?select=*&or=(requester_id.eq."+myId+",receiver_id.eq."+myId+")");
-    if(!reqs.length){list.innerHTML="<div class='card'>No matches yet</div>";return}
-    const profs={};allProfiles.forEach(p=>profs[p.id]=p);
+    const likesMe = await api("likes?select=*&liked_id=eq."+myId);
+    const iLiked = await api("likes?select=*&liker_id=eq."+myId);
+    if(!likesMe.length && !iLiked.length){list.innerHTML="<div class='card'>No likes yet. Go to Discover and Like someone ❤️</div>";return}
+    const profs={}; allProfiles.forEach(p=>profs[p.id]=p);
     if(!allProfiles.length){const ps=await api("profiles?select=*");ps.forEach(p=>profs[p.id]=p)}
-    list.innerHTML=reqs.map(r=>{
-      const otherId=r.requester_id===myId?r.receiver_id:r.requester_id;
-      const p=profs[otherId]||{name:"Someone"};
-      const isIncoming=r.receiver_id===myId && r.status==='pending';
-      return `<div class="card"><h3>${esc(p.name)}</h3><p>Status: ${r.status}</p>
-      ${isIncoming?`<button onclick="respondMatch('${r.id}','accepted')">✅ Accept</button> <button onclick="respondMatch('${r.id}','declined')">❌ Decline</button>`:''}
-      ${r.status==='accepted'?`<button onclick="openChat('${otherId}')">💬 Chat Here</button>`:''}
-      </div>`;
-    }).join("");
-  }catch(e){list.innerHTML="<div class='card'>Could not load matches</div>"}
+    let html = "";
+    if(likesMe.length){
+      html += "<h3 style='margin:10px 0'>💜 People who liked you</h3>";
+      html += likesMe.map(r=>{
+        const p=profs[r.liker_id]||{name:"Someone"};
+        const mutual = iLiked.some(x=>x.liked_id===r.liker_id);
+        return `<div class="card"><h3>${esc(p.name)} ${r.type==='super'?'🔥 SUPER LIKE':''}</h3><p>${mutual?'💘 MATCH! You liked each other': 'They liked you - Like them back to Match!'}</p><button class="btn small" onclick="likeProfile('${r.liker_id}','like')">❤️ Like Back</button> ${mutual?`<button class="btn small btn2" onclick="openChat('${r.liker_id}','${esc(p.name)}')">💬 Chat Here</button>`:''}</div>`;
+      }).join("");
+    }
+    if(iLiked.length){
+      html += "<h3 style='margin:15px 0 10px'>❤️ You liked</h3>";
+      html += iLiked.map(r=>{
+        const p=profs[r.liked_id]||{name:"Someone"};
+        return `<div class="card"><h3>${esc(p.name)} ${r.type==='super'?'🔥':''}</h3><p>Waiting for them to like you back...</p></div>`;
+      }).join("");
+    }
+    list.innerHTML = html;
+  }catch(e){list.innerHTML="<div class='card'>Could not load matches: "+e.message+"</div>"}
 }
 async function respondMatch(id,status){
   await api("match_requests?id=eq."+id,"PATCH",{status:status});
